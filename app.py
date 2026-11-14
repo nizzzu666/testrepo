@@ -195,7 +195,7 @@ def create_app(test_config=None):
 
     @app.get("/uploads/<path:filename>")
     def uploaded_image(filename):
-        if not re.fullmatch(r"[a-f0-9]{32}\\.webp", filename):
+        if not re.fullmatch(r"[a-f0-9]{32}\.webp", filename):
             abort(404)
         return send_from_directory(app.config["UPLOAD_FOLDER"], filename, max_age=86400)
 
