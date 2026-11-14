@@ -24,7 +24,7 @@
 <img src="{{ product['image_url'] }}" alt="{{ product['name'] }}" loading="lazy">{% if product['tag'] %}<span class="product-tag">{{ product['tag'] }}</span>{% endif %}<span class="image-arrow" aria-hidden="true">↗</span></a>
 <div class="product-info"><div><span class="product-category">{{ 'DRESSES' if product['category']=='dresses' else 'WATCHES' }}</span><h3><a href="{{ url_for('product_detail',pid=product['id']) }}">{{ product['name'] }}</a></h3></div><span class="product-price">₹{{ '{:,.0f}'.format(product['price_paise']/100) }}</span></div>
 <p class="product-description">{{ product['description'] }}</p>
-{% set wa=whatsapp_link(product['name'],product['price_paise']) %}{% if wa %}<a class="buy-link" href="{{ wa }}" target="_blank" rel="noopener noreferrer">Enquire on WhatsApp <span>↗</span></a>{% else %}<span class="buy-link is-disabled" title="Store WhatsApp number is not configured">WhatsApp enquiry <span>↗</span></span>{% endif %}
+<a class="buy-link" href="{{ url_for('product_detail',pid=product['id']) }}#enquiry">Enquire on WhatsApp <span>↗</span></a>
 </article>{% endfor %}</div><div class="empty-state" id="empty-state" hidden>Nothing here just yet. Try another search.</div>
 <div class="collection-foot"><span>GOOD TASTE IS PERSONAL.</span><span>{{ products|length }} THOUGHTFUL FINDS <b>✳</b></span></div></section>
 <section class="story-band"><div class="story-photo reveal"><img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1100&q=85" alt="A curated selection of timeless clothing" loading="lazy"></div>
