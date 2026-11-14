@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Aurel & Thread — Dresses, Watches & Everyday Finds{% endblock %}
+{% block content %}
+<section class="hero">
+<div class="hero-copy reveal"><span class="eyebrow"><span class="eyebrow-dot"></span> A SMALL EDITION OF GOOD THINGS</span>
+<h1>Find your<br><em>everyday</em> lovely.</h1>
+<p>Thoughtful dresses and timeless watches, chosen to make the everyday feel a little more special.</p>
+<a class="button button-dark" href="#collection">Explore the collection <span>↗</span></a>
+<div class="hero-caption"><span>01 / 02</span><span>THE ART OF THE EVERYDAY</span></div></div>
+<div class="hero-visual reveal reveal-delay"><div class="hero-image hero-image-main"><img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1300&q=88" alt="A thoughtfully styled fashion look" fetchpriority="high"></div>
+<div class="hero-image hero-image-small"><img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=700&q=85" alt="Minimal wristwatch detail"></div>
+<div class="hero-stamp"><span>CURATED<br>WITH CARE</span><b>✳</b></div><div class="hero-index">A / T — 2026</div></div>
+<div class="hero-bottom"><span>MADE FOR THE MOMENTS IN BETWEEN</span><span>SCROLL TO DISCOVER ↓</span></div></section>
+<section class="intro-strip"><p>LESS, BUT BETTER.</p><span>✳</span><p>PERSONAL STYLE, YOUR WAY.</p><span>✳</span><p>ALWAYS WORTH A SECOND LOOK.</p></section>
+<section class="collection section-pad" id="collection">
+<div class="section-heading reveal"><div><span class="eyebrow">THE CURRENT EDIT</span><h2>Pieces to <em>keep close.</em></h2></div><p>Easy to wear, lovely to live with.<br>Find the one that feels like you.</p></div>
+<div class="shop-tools reveal"><div class="filters" role="group" aria-label="Filter products">
+<button class="filter-chip active" data-filter="all" type="button" aria-pressed="true">All pieces <span>{{ products|length }}</span></button>
+<button class="filter-chip" data-filter="dresses" type="button" aria-pressed="false">Dresses</button><button class="filter-chip" data-filter="watches" type="button" aria-pressed="false">Watches</button></div>
+<label class="search-box"><span aria-hidden="true">⌕</span><input id="product-search" type="search" placeholder="Find something…" aria-label="Search products"></label></div>
+<div class="product-grid" id="product-grid">{% for product in products %}
+<article class="product-card reveal" data-category="{{ product['category'] }}" data-search="{{ (product['name'] ~ ' ' ~ product['description'])|lower }}">
+<a class="product-image" href="{{ url_for('product_detail',pid=product['id']) }}" aria-label="View {{ product['name'] }}">
+<img src="{{ product['image_url'] }}" alt="{{ product['name'] }}" loading="lazy">{% if product['tag'] %}<span class="product-tag">{{ product['tag'] }}</span>{% endif %}<span class="image-arrow" aria-hidden="true">↗</span></a>
+<div class="product-info"><div><span class="product-category">{{ 'DRESSES' if product['category']=='dresses' else 'WATCHES' }}</span><h3><a href="{{ url_for('product_detail',pid=product['id']) }}">{{ product['name'] }}</a></h3></div><span class="product-price">₹{{ '{:,.0f}'.format(product['price_paise']/100) }}</span></div>
+<p class="product-description">{{ product['description'] }}</p>
+{% set wa=whatsapp_link(product['name'],product['price_paise']) %}{% if wa %}<a class="buy-link" href="{{ wa }}" target="_blank" rel="noopener noreferrer">Enquire on WhatsApp <span>↗</span></a>{% else %}<span class="buy-link is-disabled" title="Store WhatsApp number is not configured">WhatsApp enquiry <span>↗</span></span>{% endif %}
+</article>{% endfor %}</div><div class="empty-state" id="empty-state" hidden>Nothing here just yet. Try another search.</div>
+<div class="collection-foot"><span>GOOD TASTE IS PERSONAL.</span><span>{{ products|length }} THOUGHTFUL FINDS <b>✳</b></span></div></section>
+<section class="story-band"><div class="story-photo reveal"><img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1100&q=85" alt="A curated selection of timeless clothing" loading="lazy"></div>
+<div class="story-copy reveal reveal-delay"><span class="eyebrow">A LITTLE ABOUT THE EDIT</span><h2>Not just what<br>you wear. <em>How<br>it feels.</em></h2><p>We believe the best pieces are the ones you reach for without thinking. A dress that moves with you. A watch that quietly completes the look. A collection built around feeling good in your own style.</p><a class="text-link" href="#collection">Find your favourite <span>↗</span></a><div class="story-scribble">made for you <span>♡</span></div></div></section>
+<section class="closing-cta"><span class="eyebrow">YOUR NEXT FAVOURITE IS HERE</span><h2>Something caught<br>your <em>eye?</em></h2><p>Ask us about sizing, availability or anything at all. Real people, a friendly conversation.</p>
+{% if whatsapp_ready() %}<a class="button button-light" href="https://wa.me/{{ config['WHATSAPP_NUMBER'] }}?text=Hello%21%20I%27d%20love%20to%20know%20more%20about%20your%20collection." target="_blank" rel="noopener noreferrer">Let's talk on WhatsApp <span>↗</span></a>{% else %}<span class="button button-light button-muted">WhatsApp details coming soon</span>{% endif %}</section>
+{% endblock %}
