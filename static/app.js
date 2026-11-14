@@ -1,0 +1,10 @@
+(() => {
+ const toggle=document.querySelector('.menu-toggle'),nav=document.querySelector('.main-nav');
+ if(toggle&&nav){toggle.addEventListener('click',()=>{const open=toggle.getAttribute('aria-expanded')==='true';toggle.setAttribute('aria-expanded',String(!open));nav.classList.toggle('open',!open)});
+ nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');toggle.setAttribute('aria-expanded','false')}));}
+ const cards=[...document.querySelectorAll('.product-card')],chips=[...document.querySelectorAll('[data-filter]')],search=document.querySelector('#product-search'),empty=document.querySelector('#empty-state');let filter='all';
+ function apply(){const q=(search?.value||'').trim().toLowerCase();let count=0;cards.forEach(card=>{const show=(filter==='all'||card.dataset.category===filter)&&(!q||(card.dataset.search||'').includes(q));card.hidden=!show;if(show)count++});if(empty)empty.hidden=count!==0}
+ chips.forEach(chip=>chip.addEventListener('click',()=>{filter=chip.dataset.filter||'all';chips.forEach(x=>{const active=x===chip;x.classList.toggle('active',active);x.setAttribute('aria-pressed',String(active))});apply()}));search?.addEventListener('input',apply);
+ document.querySelectorAll('form[data-confirm]').forEach(form=>form.addEventListener('submit',e=>{if(!window.confirm(form.dataset.confirm||'Are you sure?'))e.preventDefault()}));
+ const items=document.querySelectorAll('.reveal');if('IntersectionObserver'in window&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('is-visible');observer.unobserve(entry.target)}}),{threshold:.08,rootMargin:'0px 0px -30px 0px'});items.forEach(item=>observer.observe(item))}else items.forEach(item=>item.classList.add('is-visible'));
+})();
