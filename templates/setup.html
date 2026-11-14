@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}First-time Super Admin setup — Aurel & Thread{% endblock %}
+{% block content %}<section class="auth-page section-pad"><div class="auth-card reveal"><span class="eyebrow">ONE-TIME FIRST-RUN SETUP</span><h1>Create your <em>Super Admin.</em></h1><p>This setup is available only before the first Super Admin account exists. Keep your setup token private.</p>
+<form method="post" action="{{ url_for('first_run_setup') }}" class="form-stack"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label>One-time setup token<input name="setup_token" type="password" autocomplete="off" required></label>
+<label>Super Admin username<input name="username" type="text" minlength="3" maxlength="40" autocomplete="username" required></label>
+<label>Create password<input name="password" type="password" minlength="12" maxlength="256" autocomplete="new-password" required><span class="field-help">At least 12 characters, including uppercase, lowercase, number and symbol.</span></label>
+<label>Confirm password<input name="confirm_password" type="password" minlength="12" maxlength="256" autocomplete="new-password" required></label>
+<button class="button button-dark button-wide" type="submit">Create Super Admin securely <span>↗</span></button></form><p class="admin-tip">After setup, remove INITIAL_SETUP_TOKEN from your hosting environment settings. The setup URL will no longer work after the first account is created.</p></div></section>{% endblock %}
