@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}{{ product['name'] }} — Aurel & Thread{% endblock %}
+{% block content %}<section class="detail-page section-pad"><a class="back-link" href="{{ url_for('home') }}#collection">← Back to the collection</a><div class="detail-layout">
+<div class="detail-photo reveal"><img src="{{ product['image_url'] }}" alt="{{ product['name'] }}"></div><div class="detail-copy reveal reveal-delay"><span class="eyebrow">{{ 'DRESSES' if product['category']=='dresses' else 'WATCHES' }} / THE CURRENT EDIT</span>
+<h1>{{ product['name'] }}</h1><div class="detail-price">₹{{ '{:,.0f}'.format(product['price_paise']/100) }}</div><p>{{ product['description'] }}</p>
+<p class="detail-note">A considered piece, selected with everyday versatility in mind. Message us for availability, sizing and any details you’d like to know.</p>
+{% set wa=whatsapp_link(product['name'],product['price_paise']) %}{% if wa %}<a class="button button-dark button-wide" href="{{ wa }}" target="_blank" rel="noopener noreferrer">Enquire / Buy on WhatsApp <span>↗</span></a>{% else %}<span class="button button-dark button-wide button-muted">WhatsApp number not configured</span>{% endif %}
+<div class="detail-assurance"><span>✳ Friendly, personal service</span><span>✳ No online payment required</span></div></div></div></section>{% endblock %}
