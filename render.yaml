@@ -12,11 +12,9 @@ services:
         value: "true"
       - key: SECRET_KEY
         generateValue: true
+      - key: INITIAL_SETUP_TOKEN
+        sync: false
       - key: WHATSAPP_NUMBER
-        sync: false
-      - key: ADMIN_USERNAME
-        sync: false
-      - key: ADMIN_PASSWORD_HASH
         sync: false
       - key: DATABASE_PATH
         value: /var/data/store.db
