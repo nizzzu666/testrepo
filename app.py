@@ -93,6 +93,7 @@ def create_app(test_config=None):
                 is_active INTEGER NOT NULL DEFAULT 1 CHECK(is_active IN (0,1)),
                 created_by INTEGER REFERENCES users(id),
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)""")
+            conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_single_superadmin ON users(role) WHERE role='superadmin'")
             conn.execute("""CREATE TABLE IF NOT EXISTS enquiries(
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 product_id INTEGER REFERENCES products(id) ON DELETE SET NULL,
