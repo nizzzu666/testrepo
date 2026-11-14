@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: atelier-thread-storefront
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --workers 1 --bind 0.0.0.0:$PORT wsgi:app
+    healthCheckPath: /
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WHATSAPP_NUMBER
+        sync: false
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD_HASH
+        sync: false
+      - key: DATABASE_PATH
+        value: /var/data/store.db
+    disk:
+      name: storefront-data
+      mountPath: /var/data
+      sizeGB: 1
