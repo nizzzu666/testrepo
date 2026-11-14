@@ -8,11 +8,12 @@ from functools import wraps
 from urllib.parse import urlencode, urlparse
 
 from dotenv import load_dotenv
-from flask import Flask, abort, flash, g, redirect, render_template, request, session, url_for
+from flask import Flask, abort, flash, g, redirect, render_template, request, session, url_for, send_from_directory
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import check_password_hash, generate_password_hash
+from PIL import Image, ImageOps, UnidentifiedImageError
 
 ROOT = Path(__file__).resolve().parent
 load_dotenv(ROOT / ".env")
@@ -42,6 +43,7 @@ def create_app(test_config=None):
     app.config.update(
         SECRET_KEY=os.getenv("SECRET_KEY") or ("local-only-change-this-secret" if os.getenv("APP_ENV") != "production" else ""),
         DATABASE=os.getenv("DATABASE_PATH", str(ROOT / "store.db")),
+        UPLOAD_FOLDER=os.getenv("UPLOAD_FOLDER", str(ROOT / "static" / "uploads")),
         INITIAL_SETUP_TOKEN=os.getenv("INITIAL_SETUP_TOKEN", ""),
         WHATSAPP_NUMBER=re.sub(r"\D", "", os.getenv("WHATSAPP_NUMBER", "")),
         SESSION_COOKIE_HTTPONLY=True,
@@ -49,7 +51,7 @@ def create_app(test_config=None):
         SESSION_COOKIE_SECURE=os.getenv("COOKIE_SECURE", "true").lower() == "true",
         PERMANENT_SESSION_LIFETIME=3600,
         SESSION_REFRESH_EACH_REQUEST=True,
-        MAX_CONTENT_LENGTH=1024 * 1024,
+        MAX_CONTENT_LENGTH=6 * 1024 * 1024,
         RATELIMIT_STORAGE_URI=os.getenv("RATELIMIT_STORAGE_URI", "memory://"),
     )
     if test_config:
@@ -69,6 +71,7 @@ def create_app(test_config=None):
 
     def init_db():
         Path(app.config["DATABASE"]).parent.mkdir(parents=True, exist_ok=True)
+        Path(app.config["UPLOAD_FOLDER"]).mkdir(parents=True, exist_ok=True)
         conn = connect()
         try:
             conn.execute("""CREATE TABLE IF NOT EXISTS products(
@@ -189,6 +192,12 @@ def create_app(test_config=None):
     def home():
         products = db().execute("SELECT * FROM products ORDER BY featured DESC,id DESC").fetchall()
         return render_template("index.html", products=products)
+
+    @app.get("/uploads/<path:filename>")
+    def uploaded_image(filename):
+        if not re.fullmatch(r"[a-f0-9]{32}\\.webp", filename):
+            abort(404)
+        return send_from_directory(app.config["UPLOAD_FOLDER"], filename, max_age=86400)
 
     @app.get("/product/<int:pid>")
     def product_detail(pid):
@@ -374,17 +383,49 @@ def create_app(test_config=None):
         flash("Admin account status updated." if result.rowcount else "Admin account not found.", "success" if result.rowcount else "error")
         return redirect(url_for("superadmin_dashboard"))
 
-    def product_form_values():
+    def save_product_image(existing_image=None):
+        uploaded = request.files.get("image_file")
+        image_url = request.form.get("image_url", "").strip()
+        if uploaded and uploaded.filename:
+            if image_url:
+                raise ValueError("Choose either an uploaded photo or an image URL, not both.")
+            try:
+                uploaded.stream.seek(0)
+                with Image.open(uploaded.stream) as check:
+                    if check.format not in {"JPEG", "PNG", "WEBP"}:
+                        raise ValueError("Upload a JPG, PNG or WebP image.")
+                    check.verify()
+                uploaded.stream.seek(0)
+                with Image.open(uploaded.stream) as source:
+                    source = ImageOps.exif_transpose(source)
+                    if source.width * source.height > 25000000:
+                        raise ValueError("The image is too large. Use an image under 25 megapixels.")
+                    image = source.convert("RGBA" if "A" in source.getbands() else "RGB")
+                    image.thumbnail((1800, 1800))
+                    filename = secrets.token_hex(16) + ".webp"
+                    destination = Path(app.config["UPLOAD_FOLDER"]) / filename
+                    image.save(destination, "WEBP", quality=88, method=6)
+                return "/uploads/" + filename
+            except (UnidentifiedImageError, OSError, Image.DecompressionBombError):
+                raise ValueError("The photo could not be read. Upload a valid JPG, PNG or WebP image.")
+        if image_url:
+            parsed = urlparse(image_url)
+            if parsed.scheme != "https" or parsed.hostname not in IMAGE_HOSTS or parsed.username or parsed.password:
+                raise ValueError("Use an HTTPS image from Unsplash, Pexels or Cloudinary.")
+            return image_url
+        if existing_image:
+            return existing_image
+        raise ValueError("Upload a product photo or enter an approved HTTPS image URL.")
+
+    def product_form_values(existing_image=None):
         name = request.form.get("name", "").strip()
         category = request.form.get("category", "").strip()
         desc = request.form.get("description", "").strip()
         tag = request.form.get("tag", "").strip()[:30]
-        image = request.form.get("image_url", "").strip()
         try:
             price = round(float(request.form.get("price", "")) * 100)
         except (TypeError, ValueError):
             price = 0
-        parsed = urlparse(image)
         if not 2 <= len(name) <= 80:
             raise ValueError("Product name must be 2–80 characters.")
         if category not in {"dresses", "watches"}:
@@ -393,8 +434,7 @@ def create_app(test_config=None):
             raise ValueError("Description must be 5–240 characters.")
         if not 1 <= price <= 100000000:
             raise ValueError("Enter a valid INR price.")
-        if parsed.scheme != "https" or parsed.hostname not in IMAGE_HOSTS or parsed.username or parsed.password:
-            raise ValueError("Use an HTTPS image from Unsplash, Pexels or Cloudinary.")
+        image = save_product_image(existing_image)
         return (name, category, desc, price, image, tag, 1 if request.form.get("featured") == "on" else 0)
 
     @app.route("/admin/products/new", methods=["GET", "POST"])
