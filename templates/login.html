@@ -1,0 +1,4 @@
+{% extends 'base.html' %}
+{% block title %}Store admin sign in — Aurel & Thread{% endblock %}
+{% block content %}<section class="auth-page section-pad"><div class="auth-card reveal"><span class="eyebrow">PRIVATE STORE AREA</span><h1>Welcome <em>back.</em></h1><p>Sign in to keep your collection up to date.</p>
+<form method="post" action="{{ url_for('admin_login_post') }}" class="form-stack"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>Username<input name="username" type="text" autocomplete="username" maxlength="80" required></label><label>Password<input name="password" type="password" autocomplete="current-password" maxlength="256" required></label><button class="button button-dark button-wide" type="submit">Sign in <span>↗</span></button></form><a class="back-link" href="{{ url_for('home') }}">← Back to shop</a></div></section>{% endblock %}
