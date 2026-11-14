@@ -100,7 +100,7 @@ def test_first_run_setup_rejects_weak_password(client):
         "confirm_password": "short",
     })
     assert response.status_code == 200
-    assert b"At least 12 characters" in response.data
+    assert b"Use at least 12 characters" in response.data
     assert client.get("/superadmin").status_code == 302
 
 
