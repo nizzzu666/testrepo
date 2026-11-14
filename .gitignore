@@ -6,3 +6,5 @@ __pycache__/
 store.db
 *.sqlite3
 .DS_Store
+
+/static/uploads/
