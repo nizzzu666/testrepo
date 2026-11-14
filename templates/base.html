@@ -11,12 +11,14 @@
 <div class="announcement">A little something lovely, thoughtfully chosen <b>✳</b> Enquire directly with us</div>
 <header class="site-header"><a class="brand" href="{{ url_for('home') }}"><span class="brand-mark">a<span>·</span>t</span><span class="brand-name">AUREL <i>&</i> THREAD<small>THE CONSIDERED EDIT</small></span></a>
 <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav" aria-label="Toggle navigation"><span></span><span></span></button>
-<nav class="main-nav" id="main-nav"><a href="{{ url_for('home') }}#collection">The collection</a><a href="{{ url_for('home') }}#our-note">Our note</a><a class="nav-contact" href="{{ url_for('home') }}#collection">Explore the edit <span>↗</span></a></nav></header>
+<nav class="main-nav" id="main-nav"><a href="{{ url_for('home') }}#collection">The collection</a><a href="{{ url_for('home') }}#our-note">Our note</a>
+{% if current_user() %}<a class="nav-contact" href="{{ url_for('superadmin_dashboard') if current_user()['role']=='superadmin' else url_for('admin_dashboard') }}">Dashboard ↗</a><form method="post" action="{{ url_for('logout') }}" class="nav-logout"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit">Sign out</button></form>
+{% else %}<a class="nav-contact" href="{{ url_for('login_page') }}">Staff login <span>↗</span></a>{% endif %}</nav></header>
 {% with messages=get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-wrap" role="status">{% for category,message in messages %}<div class="flash flash-{{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
 <main>{% block content %}{% endblock %}</main>
 <footer class="site-footer" id="our-note"><div class="footer-top">
 <div><a class="footer-brand" href="{{ url_for('home') }}">AUREL <i>&</i> THREAD</a><p>Everyday pieces. Thoughtful details.<br>A little more you, in every way.</p></div>
-<div class="footer-links"><span class="eyebrow">LET'S CONNECT</span><a href="{{ url_for('home') }}#collection">Browse collection</a><a href="{{ url_for('admin_login') }}">Store admin</a></div>
+<div class="footer-links"><span class="eyebrow">LET'S CONNECT</span><a href="{{ url_for('home') }}#collection">Browse collection</a>{% if current_user() %}<a href="{{ url_for('admin_dashboard') }}">Store dashboard</a>{% else %}<a href="{{ url_for('login_page') }}">Staff login</a>{% endif %}</div>
 <div class="footer-note"><span class="eyebrow">A NOTE FROM US</span><p>Good things are better when they feel personal. Tell us what caught your eye — we’ll take it from there.</p></div></div>
 <div class="footer-bottom"><span>© 2026 Aurel & Thread. Made with care.</span><span>STYLE, WITHOUT THE NOISE <b>✳</b></span></div></footer>
 </body></html>
